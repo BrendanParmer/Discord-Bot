@@ -42,7 +42,7 @@ async def on_message(message):
 
     #Phrase triggers defined in example_stuff.py
     for x in stuff.trigger_responses:
-        if bool(re.match(x.trigger, message.content)):
+        if bool(re.search(x.trigger, message.content)):
             print(x.debug)
             await message.channel.send(random.choice(x.response))
             if x.is_emoji:
