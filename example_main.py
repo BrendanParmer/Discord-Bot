@@ -22,23 +22,24 @@ async def on_message(message):
     stuff = ExampleStuff(message.author.mention)
 
     #Dad jokes
-    dad_start = r"((.*?)\b[Ii]\s[Aa][Mm]\b\s)|((.*?)\b[Ii]\'?[Mm]\b\s?)"
+    dad_starts = [r"\b([Ii]\s)?[Aa][Mm]\s\b",
+                 r"\b[Ii]([\'’])?[Mm]\s\b"]
     dad_debug = "Dad joke"
-    if bool(re.match(dad_start, message.content)):
-        print(dad_debug)
-        start = re.search(dad_start, message.content).end()
+    for x in dad_starts:
+        if bool(re.search(x, message.content)):
+            print(dad_debug)
 
-        substring_array = re.split(dad_start, message.content, 2)
-        dad_end = r"([\.\,\?\!\;\:]|$)"
-        end = re.search(dad_end, substring_array[5]).start() + start
+            substring_array = re.split(x, message.content, 2)
+            print(substring_array)
 
-        new_name = message.content[start : end]
+            new_name = substring_array[2]
+            print(new_name)
 
-        greetings = ["Hello ", "Salutations ", "Hi ", "Hi ", "Hi ", "Good day "]
-        greeting = random.choice(greetings)
-        endings = ["", "?", "!", ".", " :)", " ;)", " :(", " >:(", "", "", "", ".", ".", "", "."]
-        ending = random.choice(endings)
-        await message.channel.send(greeting + new_name + ", I'm Dad" + ending)
+            greetings = ["Hello ", "Salutations ", "Hi ", "Hi ", "Hi ", "Good day "]
+            greeting = random.choice(greetings)
+            endings = ["", "?", "!", ".", " :)", " ;)", " :(", " >:(", "", "", "", ".", ".", "", "."]
+            ending = random.choice(endings)
+            await message.channel.send(greeting + new_name + ", I'm Dad" + ending)
 
     #Phrase triggers defined in example_stuff.py
     for x in stuff.trigger_responses:
