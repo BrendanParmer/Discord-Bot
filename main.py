@@ -3,10 +3,10 @@ from datetime import date, datetime, time, timedelta
 import discord
 import re
 import random
-from example_stuff import * #for custom phrases and stuff
+from triggers import * #for custom phrases and stuff
 import config
 
-stuff = ExampleStuff(config.author_mention)
+stuff = Triggers(config.author_mention)
 
 TASK_WHEN = time(12, 0, 0) #noon UTC time
 CHANNEL_ID = 0             #put your channel ID here
@@ -47,15 +47,12 @@ bot = DiscordBot(command_prefix='$',
 
 @bot.event
 async def on_message(message):
-    print("Message received")
-
     #we want to make sure the bot doesn't accidentally respond to itself infinitely
     if message.author == bot.user:
-        print("Message is from me\n")
         return
     
     config.author_mention = message.author.mention
-    stuff = ExampleStuff(message.author.mention)
+    stuff = Triggers(message.author.mention)
 
     """Dad jokes"""
     dad_starts = [r"([Ii]\s)?[Aa][Mm]\s",
@@ -78,10 +75,10 @@ async def on_message(message):
             endings = ["", "?", "!", ".", " :)", " ;)", " :(", " >:(", "", "", "", ".", ".", "", "."]
             ending = random.choice(endings)
             await message.channel.send(greeting + new_name + ", I'm Dad" + ending)
-
+    content = message.content.lower()
     """Other triggers"""
     for x in stuff.trigger_responses:
-        if bool(re.search(x.trigger, message.content)):
+        if bool(re.search(x.trigger, content)):
             print(x.debug)
             await message.channel.send(random.choice(x.response))
             if x.is_emoji:

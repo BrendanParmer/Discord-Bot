@@ -28,7 +28,7 @@ mention_debug = "User wants mentioned"
 #note how we don't have a response yet here. 
 #We need to declare that variable when a message is sent, with the ExampleStuff Class
 
-class ExampleStuff:
+class Triggers:
     author_mention = "shouldn't see this"
 
     #if you want to mention the author in a list, you must declare it in this class and in the __init__ function
