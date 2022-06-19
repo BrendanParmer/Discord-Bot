@@ -7,6 +7,7 @@ from triggers import * #for custom phrases and stuff
 import config
 
 stuff = Triggers(config.author_mention)
+MAX_EMOJI_LIMIT = 20
 
 TASK_WHEN = time(12, 0, 0) #noon UTC time
 CHANNEL_ID = 0             #put your channel ID here
@@ -78,15 +79,25 @@ async def on_message(message):
     content = message.content.lower()
     """Other triggers"""
     for x in stuff.trigger_responses:
-        if bool(re.search(x.trigger, content)):
-            print(x.debug)
-            await message.channel.send(random.choice(x.response))
-            if x.is_emoji:
-                try:
-                    await message.add_reaction(random.choice(x.emojis))
-                except:
-                    await message.add_reaction(random.choice(universal_emojis))
-                    print("Tried to use unknown emoji\n")
+        if x.server == message.guild.id or x.server == 0:
+            if bool(re.search(x.trigger, content)):
+                if x.response is not None:
+                    await message.channel.send(random.choice(x.response))
+                if x.is_emoji:
+                    if x.is_emoji == RANDOM_EMOJI:
+                        try:
+                            await message.add_reaction(random.choice(x.emojis))
+                        except:
+                            await message.add_reaction(random.choice(universal_emojis))
+                    elif x.is_emoji == ALL_EMOJIS:
+                        await message.add_reaction(x.emojis[0])
+                        i = 0
+                        while i < MAX_EMOJI_LIMIT:
+                            try:
+                                await message.add_reaction(random.choice(x.emojis))
+                                i += 1
+                            except:
+                                pass
 
 # this part's important. make sure to replace the content's of the text file with your bot's token
 # never share this
