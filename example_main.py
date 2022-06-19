@@ -1,13 +1,49 @@
-#from logging import exception
-from discord import channel
-from discord.ext import commands
+import asyncio
+from datetime import date, datetime, time, timedelta
+import discord
 import re
 import random
 from example_stuff import * #for custom phrases and stuff
 import config
 
 stuff = ExampleStuff(config.author_mention)
-bot = commands.Bot('!')
+
+TASK_WHEN = time(12, 0, 0) #noon UTC time
+CHANNEL_ID = 0             #put your channel ID here
+
+class DiscordBot(discord.Client):
+    #set up stuff like timed messages
+    async def setup_hook(self) -> None:
+        self.loop.create_task(self.timer())
+
+    # Handles sending the message at the time of day
+    async def timer(self):
+        await self.wait_until_ready()
+        now = datetime.utcnow()
+        if now.time() > TASK_WHEN:
+            tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
+            seconds = (tomorrow - now).total_seconds()
+            await asyncio.sleep(seconds)
+        while not self.is_closed():
+            now = datetime.utcnow()
+            target_time = datetime.combine(now.date(), TASK_WHEN) #replace with your 
+            seconds_until_target = (target_time - now).total_seconds()
+            await asyncio.sleep(seconds_until_target)
+            await self.task() #replace with your own function
+            tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
+            seconds = (tomorrow - now).total_seconds()
+            await asyncio.sleep(seconds)
+    
+    # Main function you want to run at the time
+    async def task(self):
+        await self.wait_until_ready()
+        channel = self.get_channel(CHANNEL_ID)
+        await channel.send("I am sentient!")
+
+bot = DiscordBot(command_prefix='$',
+                 activity = discord.Activity(type=discord.ActivityType.playing,
+                                             name="the system"),
+                 status = discord.Status.online)
 
 @bot.event
 async def on_message(message):
@@ -18,30 +54,32 @@ async def on_message(message):
         print("Message is from me\n")
         return
     
-    config.author_mention = message.author.mention #kinda hacky way to get author mention string to the private file
+    config.author_mention = message.author.mention
     stuff = ExampleStuff(message.author.mention)
 
-    #Dad jokes
-    dad_starts = [r"\b([Ii]\s)?[Aa][Mm]\s\b",
-                 r"\b[Ii]([\'’])?[Mm]\s\b"]
-    dad_debug = "Dad joke"
+    """Dad jokes"""
+    dad_starts = [r"([Ii]\s)?[Aa][Mm]\s",
+                 r"[Ii]([\'\’\"\`])?[Mm]\s",
+                 r"\b[Ee]stoy\s",
+                  r"\b[Ss]oy\s",
+                  r"\b[Jj]e\ssuis\s"]
+    punctuation = ['.', ',', ';', ':', '!', '?', '&', '-', '~']
     for x in dad_starts:
         if bool(re.search(x, message.content)):
-            print(dad_debug)
-
             substring_array = re.split(x, message.content, 2)
-            print(substring_array)
-
-            new_name = substring_array[2]
-            print(new_name)
-
-            greetings = ["Hello ", "Salutations ", "Hi ", "Hi ", "Hi ", "Good day "]
+            new_name = ""
+            for char in substring_array[2]:
+                    if char not in punctuation:
+                        new_name += char
+                    else:
+                        break
+            greetings = ["Hello ", "Salutations ", "Hi ", "Hi ", "Hi ", "Good day ", "Greetings "]
             greeting = random.choice(greetings)
             endings = ["", "?", "!", ".", " :)", " ;)", " :(", " >:(", "", "", "", ".", ".", "", "."]
             ending = random.choice(endings)
             await message.channel.send(greeting + new_name + ", I'm Dad" + ending)
 
-    #Phrase triggers defined in example_stuff.py
+    """Other triggers"""
     for x in stuff.trigger_responses:
         if bool(re.search(x.trigger, message.content)):
             print(x.debug)
@@ -55,7 +93,7 @@ async def on_message(message):
 
 # this part's important. make sure to replace the content's of the text file with your bot's token
 # never share this
-with open("EXAMPLE_BOT_TOKEN.txt", "r") as token_file:
+with open("BOT_TOKEN.txt", "r") as token_file:
     TOKEN = token_file.read()
     print("Token file read")
     
