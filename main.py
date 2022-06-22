@@ -76,6 +76,8 @@ async def on_message(message):
             endings = ["", "?", "!", ".", " :)", " ;)", " :(", " >:(", "", "", "", ".", ".", "", "."]
             ending = random.choice(endings)
             await message.channel.send(greeting + new_name + ", I'm Dad" + ending)
+
+            
     content = message.content.lower()
     """Other triggers"""
     for x in stuff.trigger_responses:
