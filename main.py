@@ -71,6 +71,8 @@ async def on_message(message):
                         new_name += char
                     else:
                         break
+            if new_name[-1] == ' ':
+                new_name = new_name[:-1]
             greetings = ["Hello ", "Salutations ", "Hi ", "Hi ", "Hi ", "Good day ", "Greetings "]
             greeting = random.choice(greetings)
             endings = ["", "?", "!", ".", " :)", " ;)", " :(", " >:(", "", "", "", ".", ".", "", "."]
